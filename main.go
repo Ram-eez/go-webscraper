@@ -24,12 +24,25 @@ func findLinks(n *html.Node) (links []string) {
 
 	return links
 }
-func main() {
-	if resp, err := http.Get("https://en.wikipedia.org/wiki/Web_scraping"); err == nil {
+
+func getLink(url string) {
+	if resp, err := http.Get(url); err == nil {
 		if rootNode, err := html.Parse(resp.Body); err == nil {
 			for _, link := range findLinks(rootNode) {
 				fmt.Printf("link : %s\n", link)
 			}
 		}
+	}
+}
+func main() {
+
+	urls := []string{
+		"https://en.wikipedia.org/wiki/Web_scraping",
+	}
+
+	// resultsChannel := make(chan string, len(ulrs))
+
+	for _, url := range urls {
+		go getLink(url)
 	}
 }
