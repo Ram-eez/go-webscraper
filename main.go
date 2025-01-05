@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"sync"
 
 	"golang.org/x/net/html"
 )
@@ -25,7 +26,8 @@ func findLinks(n *html.Node) (links []string) {
 	return links
 }
 
-func getLink(url string) {
+func getLink(url string, wg *sync.WaitGroup) {
+	defer wg.Done()
 	if resp, err := http.Get(url); err == nil {
 		if rootNode, err := html.Parse(resp.Body); err == nil {
 			for _, link := range findLinks(rootNode) {
@@ -36,13 +38,19 @@ func getLink(url string) {
 }
 func main() {
 
+	var wg sync.WaitGroup
+
 	urls := []string{
 		"https://en.wikipedia.org/wiki/Web_scraping",
+		"https://www.scrapingbee.com/blog/web-scraping-go/",
 	}
 
 	// resultsChannel := make(chan string, len(ulrs))
 
 	for _, url := range urls {
-		go getLink(url)
+		wg.Add(1)
+		go getLink(url, &wg)
 	}
+
+	wg.Wait()
 }
